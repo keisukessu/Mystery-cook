@@ -123,11 +123,68 @@ function GachaScreen({ onReveal }: { onReveal: () => void }) {
   );
 }
 
-// 03_レシピカード画面（仮）
 function ResultScreen({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6">
-      <p className="text-text-dark-brown" onClick={onRetry}>レシピカード画面（タップで戻る）</p>
+    <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6 py-12">
+      <main className="flex flex-col items-center gap-6 w-full max-w-sm">
+
+        {/* ラベル */}
+        <p className="font-playfair text-[10px] tracking-widest text-[#9A8060]">
+          — 今夜の一皿 —
+        </p>
+
+        {/* レシピカード */}
+        <div className="w-full bg-white rounded-2xl border border-border-linen overflow-hidden">
+
+          {/* 画像エリア */}
+          <div className="w-full h-40 bg-text-dark-brown" />
+
+          {/* カード本文 */}
+          <div className="flex flex-col gap-3 p-4">
+
+            {/* バッジ群 */}
+            <div className="flex gap-2 flex-wrap">
+              <span className="font-noto text-[11px] text-white bg-accent-spice-orange rounded px-2 py-0.5">
+                モロッコ
+              </span>
+              <span className="font-noto text-[11px] text-text-dark-brown bg-[#EDE5D8] border border-border-linen rounded px-2 py-0.5">
+                難易度：中級
+              </span>
+              <span className="font-noto text-[11px] text-text-dark-brown bg-[#EDE5D8] border border-border-linen rounded px-2 py-0.5">
+                60分
+              </span>
+            </div>
+
+            {/* 料理名 */}
+            <h2 className="font-playfair text-[22px] text-text-dark-brown">
+              Tagine
+            </h2>
+
+            {/* 説明文 */}
+            <p className="font-noto text-[13px] text-'#6B5A3A' leading-relaxed">
+              モロッコの伝統的な土鍋料理。スパイスが香る豊かな煮込み料理で、野菜や肉をじっくりと蒸し煮にします。
+            </p>
+
+            {/* ボタン群 */}
+            <button className="w-full rounded-lg bg-text-dark-brown py-3 font-noto text-[14px] text-bg-cream transition-opacity hover:opacity-80 cursor-pointer">
+              レシピを見る
+            </button>
+            <button className="w-full rounded-lg border border-border-linen py-3 font-noto text-[14px] text-text-dark-brown transition-opacity hover:opacity-80 cursor-pointer">
+              作った！
+            </button>
+
+          </div>
+        </div>
+
+        {/* もう一度ガチャボタン */}
+        <button
+          onClick={onRetry}
+          className="rounded-pill border border-border-linen px-8 py-3 font-playfair text-[14px] text-[#6B5A3A] transition-opacity hover:opacity-80 cursor-pointer"
+        >
+          もう一度ガチャを回す
+        </button>
+
+      </main>
     </div>
   );
 }
