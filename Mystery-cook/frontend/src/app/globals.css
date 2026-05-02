@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 @theme inline {
   /* tailwind.config.tsのCSS変数をTailwindに認識させる */
