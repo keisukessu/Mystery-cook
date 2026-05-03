@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Cloche from "@/components/Cloche";
-import { spinGacha, type Dish } from "@/lib/api";
+import { spinGacha, recordCooked, type Dish } from "@/lib/api";
 import Particles from "@/components/Particles";
 import RecipeModal from "@/components/RecipeModal";
 import { useSession } from "next-auth/react";
@@ -183,16 +183,23 @@ function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
   const [showModal, setShowModal] = useState(false);
   const [cookedMessage, setCookedMessage] = useState("");
   const { data: session } = useSession();
-  const handleCooked = () => {
+  const handleCooked = async () => {
     if (!session) {
-      // 未ログインの場合
       setCookedMessage("ログインすると「作った！」を記録できます");
       return;
     }
-    // TODO: ログイン済みの場合はAPIを叩いてDB保存
-    setCookedMessage("記録しました！");
-  };
 
+    console.log("session:", session); // ← 追加
+    console.log("accessToken:", (session as any).accessToken); // ← 追加
+
+    try {
+      await recordCooked(dish.id, (session as any).accessToken);
+      setCookedMessage("記録しました！");
+    } catch (e) {
+      console.error("recordCooked error:", e); // ← 追加
+      setCookedMessage("記録に失敗しました。もう一度お試しください。");
+    }
+  };
   return (
     <>
       {/* モーダル */}

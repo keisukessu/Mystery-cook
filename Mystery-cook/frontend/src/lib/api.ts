@@ -34,3 +34,25 @@ export async function spinGacha(): Promise<SpinResponse> {
 
     return res.json();
 }
+
+// 「作った！」を記録する
+export async function recordCooked(
+    dishId: string,
+    accessToken: string
+): Promise<void> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+    const res = await fetch(`${baseUrl}/api/v1/user-dishes/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            // JWTトークンをAuthorizationヘッダーに乗せる
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ dish_id: dishId }),
+    });
+
+    if (!res.ok) {
+        throw new Error(`APIエラー: ${res.status}`);
+    }
+}

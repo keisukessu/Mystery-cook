@@ -4,12 +4,10 @@ import Credentials from "next-auth/providers/credentials";
 
 const handler = NextAuth({
     providers: [
-        // Googleログイン
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         }),
-        // メール＋パスワードログイン
         Credentials({
             name: "credentials",
             credentials: {
@@ -19,7 +17,6 @@ const handler = NextAuth({
             async authorize(credentials): Promise<any> {
                 try {
                     const url = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/v1/auth/login`;
-
                     const res = await fetch(url, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -28,7 +25,6 @@ const handler = NextAuth({
                             password: credentials?.password,
                         }),
                     });
-
                     if (!res.ok) return null;
                     const data = await res.json();
                     return {
@@ -36,17 +32,29 @@ const handler = NextAuth({
                         email: credentials?.email,
                         accessToken: data.access_token,
                     };
-                } catch (e) {
+                } catch {
                     return null;
                 }
             },
         }),
     ],
     pages: {
-        signIn: "/login", // カスタムログインページ
+        signIn: "/login",
     },
     session: {
         strategy: "jwt",
+    },
+    callbacks: {
+        // authorizeで返したaccessTokenをJWTに保存する
+        async jwt({ token, user }) {
+            if (user) token.accessToken = (user as any).accessToken;
+            return token;
+        },
+        // JWTのaccessTokenをセッションに含める
+        async session({ session, token }) {
+            (session as any).accessToken = token.accessToken;
+            return session;
+        },
     },
 });
 
