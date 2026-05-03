@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Cloche from "@/components/Cloche";
 import { spinGacha, type Dish } from "@/lib/api";
+import Particles from "@/components/Particles";
 
 // 画面の状態を型で定義
 // → どんな値が入るか明示することでタイポによるバグを防ぐ
@@ -90,7 +91,7 @@ function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
       console.log("image_url:", dish.unsplash_image_url);
       setIsOpened(true);
       // 蓋のアニメーション(0.6s)が終わってから画像をフェードイン
-      setTimeout(() => setShowImage(true), 500);
+      setTimeout(() => setShowImage(true), 1000);
     } else {
       onReveal();
     }
@@ -118,11 +119,13 @@ function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
           </p>
         )}
 
-        {/* クローシュ・画像エリア */}
         <div
           className="relative flex items-center justify-center cursor-pointer"
           onClick={handleTap}
         >
+          {/* パーティクル：蓋が開いた瞬間に発生 */}
+          {/* <Particles trigger={isOpened} /> */}
+
           {/* 背景文字 */}
           <p
             className="absolute font-playfair text-[48px] tracking-[0.3em] text-white select-none"
@@ -131,7 +134,7 @@ function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
             MYSTERY
           </p>
 
-          {/* 料理画像：蓋が開いたらフェードイン */}
+          {/* 料理画像 */}
           {dish.unsplash_image_url && (
             <div
               className="absolute w-54 h-36 rounded-lg overflow-hidden transition-opacity duration-700"
@@ -145,7 +148,7 @@ function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
             </div>
           )}
 
-          {/* クローシュ：画像表示後に非表示 */}
+          {/* クローシュ */}
           <div
             className="transition-opacity duration-300"
             style={{ opacity: showImage ? 0 : 1 }}
