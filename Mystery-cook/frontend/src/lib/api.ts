@@ -21,7 +21,10 @@ export type SpinResponse = {
 // ガチャを回すAPI呼び出し
 // → バックエンドはlocalhost:8000で動いている
 export async function spinGacha(): Promise<SpinResponse> {
-    const res = await fetch("http://localhost:8000/api/v1/gacha/spin", {
+    // 開発時はNEXT_PUBLIC_API_URLが未設定なのでlocalhost:8000にフォールバック
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+    const res = await fetch(`${baseUrl}/api/v1/gacha/spin`, {
         method: "POST",
     });
 
