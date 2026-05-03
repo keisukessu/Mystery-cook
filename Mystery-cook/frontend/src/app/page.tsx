@@ -60,7 +60,7 @@ function TopScreen({ onStart, isLoading }: { onStart: () => void; isLoading: boo
         <p className="font-noto text-[13px] text-[#6B5A3A]">
           世界の料理がランダムで1つ表示されます。
         </p>
-        <Cloche />
+        <Cloche isOpened={false} />
         <div className="w-12 border-t border-border-linen" />
         <button
           onClick={onStart}
@@ -82,10 +82,15 @@ function TopScreen({ onStart, isLoading }: { onStart: () => void; isLoading: boo
 // 02_ガチャ画面
 function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
   const [isOpened, setIsOpened] = useState(false);
+  // 画像フェードイン用：蓋が上がりきってから画像を表示するため少し遅らせる
+  const [showImage, setShowImage] = useState(false);
 
   const handleTap = () => {
     if (!isOpened) {
+      console.log("image_url:", dish.unsplash_image_url);
       setIsOpened(true);
+      // 蓋のアニメーション(0.6s)が終わってから画像をフェードイン
+      setTimeout(() => setShowImage(true), 500);
     } else {
       onReveal();
     }
@@ -94,40 +99,76 @@ function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-[#1A0E06] px-6">
       <main className="flex flex-col items-center gap-6 w-full max-w-sm text-center">
+
         <p className="font-playfair text-[10px] tracking-widest text-[#6B5A3A]">
           Tonight&apos;s Mystery
         </p>
-        <p className="font-noto text-[15px] text-[#D4C5A9]">
-          クローシュをタップせよ
-        </p>
-        <div className="relative flex items-center justify-center" onClick={handleTap}>
+        {showImage ? (
+          <div className="flex flex-col items-center gap-1">
+            <p className="font-playfair text-[26px] text-bg-cream">
+              {dish.name}
+            </p>
+            <p className="font-noto text-[11px] text-accent-spice-orange mb-2">
+              {dish.country}
+            </p>
+          </div>
+        ) : (
+          <p className="font-noto text-[15px] text-[#D4C5A9]">
+            何の料理が出てくるかな？
+          </p>
+        )}
+
+        {/* クローシュ・画像エリア */}
+        <div
+          className="relative flex items-center justify-center cursor-pointer"
+          onClick={handleTap}
+        >
+          {/* 背景文字 */}
           <p
             className="absolute font-playfair text-[48px] tracking-[0.3em] text-white select-none"
             style={{ opacity: 0.2 }}
           >
             MYSTERY
           </p>
-          <Cloche />
+
+          {/* 料理画像：蓋が開いたらフェードイン */}
+          {dish.unsplash_image_url && (
+            <div
+              className="absolute w-54 h-36 rounded-lg overflow-hidden transition-opacity duration-700"
+              style={{ opacity: showImage ? 1 : 0 }}
+            >
+              <img
+                src={dish.unsplash_image_url}
+                alt={dish.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* クローシュ：画像表示後に非表示 */}
+          <div
+            className="transition-opacity duration-300"
+            style={{ opacity: showImage ? 0 : 1 }}
+          >
+            <Cloche isOpened={isOpened} />
+          </div>
         </div>
+
         {!isOpened && (
           <p className="font-noto text-[12px] text-[#6B5A3A]">
             — タップして蓋を開ける —
           </p>
         )}
+
         {isOpened && (
           <div className="flex flex-col items-center gap-2 transition-opacity duration-700">
-            {/* ダミーデータから本物のデータに差し替え */}
-            <p className="font-noto text-[11px] text-accent-spice-orange">
-              {dish.country}
-            </p>
-            <p className="font-playfair text-[26px] text-bg-cream">
-              {dish.name}
-            </p>
-            <p className="font-noto text-[11px] text-[#6B5A3A]">
+
+            <p className="font-noto text-[11px] text-[#6B5A3A] mt-6">
               — タップしてレシピカードを見る —
             </p>
           </div>
         )}
+
       </main>
     </div>
   );
