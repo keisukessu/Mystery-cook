@@ -5,6 +5,7 @@ import Cloche from "@/components/Cloche";
 import { spinGacha, type Dish } from "@/lib/api";
 import Particles from "@/components/Particles";
 import RecipeModal from "@/components/RecipeModal";
+import { useSession } from "next-auth/react";
 
 // 画面の状態を型で定義
 // → どんな値が入るか明示することでタイポによるバグを防ぐ
@@ -180,6 +181,17 @@ function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
 
 function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
   const [showModal, setShowModal] = useState(false);
+  const [cookedMessage, setCookedMessage] = useState("");
+  const { data: session } = useSession();
+  const handleCooked = () => {
+    if (!session) {
+      // 未ログインの場合
+      setCookedMessage("ログインすると「作った！」を記録できます");
+      return;
+    }
+    // TODO: ログイン済みの場合はAPIを叩いてDB保存
+    setCookedMessage("記録しました！");
+  };
 
   return (
     <>
@@ -231,7 +243,15 @@ function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
               >
                 レシピを見る
               </button>
-              <button className="w-full rounded-lg border border-border-linen py-3 font-noto text-[14px] text-text-dark-brown transition-opacity hover:opacity-80 cursor-pointer">
+              {cookedMessage && (
+                <p className="font-noto text-[13px] text-accent-spice-orange text-center">
+                  {cookedMessage}
+                </p>
+              )}
+              <button
+                onClick={handleCooked}
+                className="w-full rounded-lg border border-border-linen py-3 font-noto text-[14px] text-text-dark-brown transition-opacity hover:opacity-80 cursor-pointer"
+              >
                 作った！
               </button>
             </div>
