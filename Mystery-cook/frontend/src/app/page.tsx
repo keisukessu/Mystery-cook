@@ -4,6 +4,7 @@ import { useState } from "react";
 import Cloche from "@/components/Cloche";
 import { spinGacha, type Dish } from "@/lib/api";
 import Particles from "@/components/Particles";
+import RecipeModal from "@/components/RecipeModal";
 
 // 画面の状態を型で定義
 // → どんな値が入るか明示することでタイポによるバグを防ぐ
@@ -178,56 +179,71 @@ function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
 }
 
 function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
+  const [showModal, setShowModal] = useState(false);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6 py-12">
-      <main className="flex flex-col items-center gap-6 w-full max-w-sm">
-        <p className="font-playfair text-[10px] tracking-widest text-[#9A8060]">
-          — 今夜の一皿 —
-        </p>
-        <div className="w-full bg-white rounded-2xl border border-border-linen overflow-hidden">
-          {/* 画像：unsplash_image_urlがあれば表示、なければダークプレースホルダー */}
-          {dish.unsplash_image_url ? (
-            <img
-              src={dish.unsplash_image_url}
-              alt={dish.name}
-              className="w-full h-40 object-cover"
-            />
-          ) : (
-            <div className="w-full h-40 bg-text-dark-brown" />
-          )}
-          <div className="flex flex-col gap-3 p-4">
-            <div className="flex gap-2 flex-wrap">
-              <span className="font-noto text-[11px] text-white bg-accent-spice-orange rounded px-2 py-0.5">
-                {dish.country}
-              </span>
-              <span className="font-noto text-[11px] text-text-dark-brown bg-[#EDE5D8] border border-border-linen rounded px-2 py-0.5">
-                難易度：{dish.difficulty}
-              </span>
-              <span className="font-noto text-[11px] text-text-dark-brown bg-[#EDE5D8] border border-border-linen rounded px-2 py-0.5">
-                {dish.cook_time_minutes}分
-              </span>
+    <>
+      {/* モーダル */}
+      {showModal && (
+        <RecipeModal
+          dish={dish}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+
+      <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6 py-12">
+        <main className="flex flex-col items-center gap-6 w-full max-w-sm">
+          <p className="font-playfair text-[10px] tracking-widest text-[#9A8060]">
+            — 今夜の一皿 —
+          </p>
+          <div className="w-full bg-white rounded-2xl border border-border-linen overflow-hidden">
+            {dish.unsplash_image_url ? (
+              <img
+                src={dish.unsplash_image_url}
+                alt={dish.name}
+                className="w-full h-40 object-cover"
+              />
+            ) : (
+              <div className="w-full h-40 bg-text-dark-brown" />
+            )}
+            <div className="flex flex-col gap-3 p-4">
+              <div className="flex gap-2 flex-wrap">
+                <span className="font-noto text-[11px] text-white bg-accent-spice-orange rounded px-2 py-0.5">
+                  {dish.country}
+                </span>
+                <span className="font-noto text-[11px] text-text-dark-brown bg-[#EDE5D8] border border-border-linen rounded px-2 py-0.5">
+                  難易度：{dish.difficulty}
+                </span>
+                <span className="font-noto text-[11px] text-text-dark-brown bg-[#EDE5D8] border border-border-linen rounded px-2 py-0.5">
+                  {dish.cook_time_minutes}分
+                </span>
+              </div>
+              <h2 className="font-playfair text-[22px] text-text-dark-brown">
+                {dish.name}
+              </h2>
+              <p className="font-noto text-[13px] text-'#6B5A3A' leading-relaxed">
+                {dish.description}
+              </p>
+              {/* レシピを見るボタン：クリックでモーダルを開く */}
+              <button
+                onClick={() => setShowModal(true)}
+                className="w-full rounded-lg bg-text-dark-brown py-3 font-noto text-[14px] text-bg-cream transition-opacity hover:opacity-80 cursor-pointer"
+              >
+                レシピを見る
+              </button>
+              <button className="w-full rounded-lg border border-border-linen py-3 font-noto text-[14px] text-text-dark-brown transition-opacity hover:opacity-80 cursor-pointer">
+                作った！
+              </button>
             </div>
-            <h2 className="font-playfair text-[22px] text-text-dark-brown">
-              {dish.name}
-            </h2>
-            <p className="font-noto text-[13px] text-'#6B5A3A' leading-relaxed">
-              {dish.description}
-            </p>
-            <button className="w-full rounded-lg bg-text-dark-brown py-3 font-noto text-[14px] text-bg-cream transition-opacity hover:opacity-80 cursor-pointer">
-              レシピを見る
-            </button>
-            <button className="w-full rounded-lg border border-border-linen py-3 font-noto text-[14px] text-text-dark-brown transition-opacity hover:opacity-80 cursor-pointer">
-              作った！
-            </button>
           </div>
-        </div>
-        <button
-          onClick={onRetry}
-          className="rounded-pill border border-border-linen px-8 py-3 font-playfair text-[14px] text-[#6B5A3A] transition-opacity hover:opacity-80 cursor-pointer"
-        >
-          もう一度ガチャを回す
-        </button>
-      </main>
-    </div>
+          <button
+            onClick={onRetry}
+            className="rounded-pill border border-border-linen px-8 py-3 font-playfair text-[14px] text-[#6B5A3A] transition-opacity hover:opacity-80 cursor-pointer"
+          >
+            もう一度ガチャを回す
+          </button>
+        </main>
+      </div>
+    </>
   );
 }
