@@ -87,7 +87,7 @@ async def gacha_spin(
 
     # Step 4: Unsplash で写真取得
     unsplash_service = UnsplashService()
-    image_url = await unsplash_service.search_food_image(generated.name)
+    image_url = await unsplash_service.search_food_image(generated.name_en)
 
     # Step 5: DBに保存
     new_dish = Dish(

@@ -23,8 +23,11 @@ class GeneratedDish(BaseModel):
     Claude APIから返ってくることを期待するデータ構造。
     Pydanticで受け取ることで、Claude出力の不正な形式を早期に検出できる。
     """
+    
     name: str
+    name_en: str  # ← Unsplash検索用に英語名
     country: str
+    country_en: str 
     difficulty: int  # 1〜5
     cook_time_minutes: int
     description: str
@@ -39,8 +42,10 @@ SYSTEM_PROMPT = """
 以下のJSON形式のみで回答してください。前置き・後書き・コードブロックは不要です。
 
 {
-  "name": "料理名（英語）",
-  "country": "発祥国・地域名（英語）",
+  "name": "料理名（日本語または現地語のカタカナ表記）",
+  "name_en": "料理名（英語）",
+  "country": "発祥国・地域名（日本語）",
+  "country_en": "発祥国・地域名（英語）",
   "difficulty": 難易度（1〜5の整数）,
   "cook_time_minutes": 調理時間（分・整数）,
   "description": "料理の概要（日本語・100文字程度）",
