@@ -5,7 +5,8 @@ import Cloche from "@/components/Cloche";
 import { spinGacha, recordCooked, type Dish } from "@/lib/api";
 import Particles from "@/components/Particles";
 import RecipeModal from "@/components/RecipeModal";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+
 
 // 画面の状態を型で定義
 // → どんな値が入るか明示することでタイポによるバグを防ぐ
@@ -15,6 +16,7 @@ export default function Home() {
   const [screen, setScreen] = useState<Screen>("top");
   const [dish, setDish] = useState<Dish | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { data: session } = useSession();
 
   // ガチャを回すボタンを押したときの処理
   const handleStart = async () => {
@@ -34,7 +36,7 @@ export default function Home() {
   return (
     <>
       {screen === "top" && (
-        <TopScreen onStart={handleStart} isLoading={isLoading} />
+        <TopScreen onStart={handleStart} isLoading={isLoading} session={session} />
       )}
       {screen === "gacha" && dish && (
         <GachaScreen dish={dish} onReveal={() => setScreen("result")} />
@@ -48,10 +50,38 @@ export default function Home() {
     </>
   );
 }
+
 // 01_トップ画面
-function TopScreen({ onStart, isLoading }: { onStart: () => void; isLoading: boolean }) {
+function TopScreen({ onStart, isLoading, session }: { onStart: () => void; isLoading: boolean; session: any }) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6">
+    <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6 relative">
+      {/* 右上のログインボタン */}
+      <div className="absolute top-4 right-4">
+        {session ? (
+          <button
+            onClick={() => signOut()}
+            className="flex items-center gap-1.5 font-noto text-[12px] text-[#9A8060] hover:text-text-dark-brown transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            ログアウト
+          </button>
+        ) : (
+          <a
+            href="/login"
+            className="flex items-center gap-1.5 font-noto text-[12px] text-[#9A8060] hover:text-text-dark-brown transition-colors border border-border-linen rounded-full px-3 py-1.5"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            ログイン / 登録
+          </a>
+        )}
+      </div>
+
       <main className="flex flex-col items-center gap-6 w-full max-w-sm text-center">
         <p className="font-playfair text-[11px] tracking-widest text-[#9A8060]">
           — Chef&apos;s Table —
@@ -70,7 +100,6 @@ function TopScreen({ onStart, isLoading }: { onStart: () => void; isLoading: boo
           disabled={isLoading}
           className="w-full rounded-pill bg-text-dark-brown px-8 py-3 font-noto text-[16px] text-bg-cream transition-opacity hover:opacity-80 cursor-pointer disabled:opacity-50"
         >
-          {/* ローディング中はテキストを変える */}
           {isLoading ? "料理を探しています..." : "ガチャを回す"}
         </button>
         <div className="w-12 border-t border-border-linen" />

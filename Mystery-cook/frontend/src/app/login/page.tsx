@@ -55,9 +55,21 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6">
-            <main className="flex flex-col items-center gap-6 w-full max-w-sm">
+        <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6 relative">
+            {/* 左上のホームに戻るボタン */}
+            <div className="absolute top-4 left-4">
+                <a
+                    href="/"
+                    className="flex items-center gap-1.5 font-noto text-[12px] text-[#9A8060] hover:text-text-dark-brown transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5M5 12l7-7M5 12l7 7" />
+                    </svg>
+                    ホームへ
+                </a>
+            </div>
 
+            <main className="flex flex-col items-center gap-6 w-full max-w-sm">
                 <p className="font-playfair text-[11px] tracking-widest text-[#9A8060]">
                     — Mystery Cook —
                 </p>
@@ -68,8 +80,8 @@ export default function LoginPage() {
                     <button
                         onClick={() => { setMode("login"); setError(""); }}
                         className={`flex-1 py-2 font-noto text-[14px] transition-colors cursor-pointer ${mode === "login"
-                                ? "bg-text-dark-brown text-bg-cream"
-                                : "bg-white text-text-dark-brown"
+                            ? "bg-text-dark-brown text-bg-cream"
+                            : "bg-white text-text-dark-brown"
                             }`}
                     >
                         ログイン
@@ -77,8 +89,8 @@ export default function LoginPage() {
                     <button
                         onClick={() => { setMode("register"); setError(""); }}
                         className={`flex-1 py-2 font-noto text-[14px] transition-colors cursor-pointer ${mode === "register"
-                                ? "bg-text-dark-brown text-bg-cream"
-                                : "bg-white text-text-dark-brown"
+                            ? "bg-text-dark-brown text-bg-cream"
+                            : "bg-white text-text-dark-brown"
                             }`}
                     >
                         新規登録
@@ -140,7 +152,6 @@ export default function LoginPage() {
                 <p className="font-playfair text-[11px] tracking-widest text-[#9A8060]">
                     Chef&apos;s Table
                 </p>
-
             </main>
         </div>
     );
