@@ -17,6 +17,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import UserCreate, UserLogin, TokenResponse
 from app.core.security import hash_password, verify_password, create_access_token
+from app.schemas.auth import UserCreate, UserLogin, TokenResponse, GoogleAuthRequest
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -69,6 +70,33 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="メールアドレスまたはパスワードが間違っています",
         )
+
+    token = create_access_token({"sub": str(user.id)})
+    return TokenResponse(access_token=token)
+
+@router.post("/google", response_model=TokenResponse)
+async def google_auth(
+    body: GoogleAuthRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Googleログイン用のUpsertエンドポイント。
+    ユーザーが存在すればそのままトークンを返し、
+    存在しなければ新規作成してトークンを返す。
+    パスワードなしで登録するためhashed_passwordは空文字にする。
+    """
+    result = await db.execute(select(User).where(User.email == body.email))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        # 初回Googleログイン時にユーザーを作成
+        user = User(
+            email=body.email,
+            hashed_password="",  # Googleログインはパスワードなし
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
 
     token = create_access_token({"sub": str(user.id)})
     return TokenResponse(access_token=token)

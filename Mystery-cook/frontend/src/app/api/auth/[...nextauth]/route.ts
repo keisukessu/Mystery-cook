@@ -45,6 +45,26 @@ const handler = NextAuth({
         strategy: "jwt",
     },
     callbacks: {
+        // Googleログイン時にバックエンドでユーザーをUpsertしてaccessTokenを取得する
+        async signIn({ user, account }) {
+            if (account?.provider === "google") {
+                try {
+                    const url = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/v1/auth/google`;
+                    const res = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: user.email, name: user.name }),
+                    });
+                    if (!res.ok) return false;
+                    const data = await res.json();
+                    // accessTokenをuserオブジェクトに一時保存→jwtコールバックで拾う
+                    (user as any).accessToken = data.access_token;
+                } catch {
+                    return false;
+                }
+            }
+            return true;
+        },
         // authorizeで返したaccessTokenをJWTに保存する
         async jwt({ token, user }) {
             if (user) token.accessToken = (user as any).accessToken;

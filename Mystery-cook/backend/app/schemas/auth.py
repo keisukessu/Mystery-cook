@@ -48,3 +48,8 @@ class TokenResponse(BaseModel):
     """JWT発行レスポンス"""
     access_token: str
     token_type: str = "bearer"
+    
+class GoogleAuthRequest(BaseModel):
+    """GoogleログインユーザーのUpsertリクエスト"""
+    email: EmailStr
+    name: str | None = None
