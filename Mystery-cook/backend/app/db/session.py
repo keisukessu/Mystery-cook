@@ -6,7 +6,7 @@ from app.core.config import settings
 # 非同期エンジンを作成。接続はアプリ起動時に1度だけ行われる。
 # pool_pre_ping=True：接続が切れていた場合に自動で再接続を試みる
 engine = create_async_engine(
-    "postgresql+asyncpg://dummy:dummy@localhost:5432/dummy",
+    settings.database_url,
     echo=settings.debug,
     pool_pre_ping=True,
     connect_args={"ssl": "require"},  # Supabase本番環境はSSL必須

@@ -7,23 +7,12 @@ from app.api.v1 import router as api_v1_router
 from app.core.config import settings
 from app.db.session import Base, engine
 
-
+    
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    アプリのライフサイクル管理。
-
-    FastAPI の推奨する起動・終了処理の書き方。
-    yield の前が起動時処理、yield の後が終了時処理。
-
-    開発環境ではDBテーブルを自動作成する。
-    本番環境では Alembic のマイグレーションで管理するため実行しない。
-    """
-    if not settings.is_production:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
-    # アプリ終了時にDB接続プールを解放する
     await engine.dispose()
 
 
