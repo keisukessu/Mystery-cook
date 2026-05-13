@@ -6,7 +6,7 @@ anthropic の公式クライアントは同期・非同期両対応だが、
 run_in_executor でスレッドプールに逃がすことで
 FastAPI のイベントループへの影響を最小限にする。
 """
-
+import asyncio
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
@@ -27,11 +27,19 @@ logger = logging.getLogger(__name__)
 
 _executor = ThreadPoolExecutor(max_workers=4)
 
+def get_claude_service() -> ClaudeService:
+    return ClaudeService()
+
+def get_unsplash_service() -> UnsplashService:
+    return UnsplashService()
+
 
 @router.post("/spin", response_model=GachaSpinResponse)
 async def gacha_spin(
-    user_id: str | None = None,  # TODO: Phase 4で認証後は Depends(get_current_user) に変える
+    user_id: str | None = None,  
     db: AsyncSession = Depends(get_db),
+    claude_service: ClaudeService = Depends(get_claude_service),
+    unsplash_service: UnsplashService = Depends(get_unsplash_service),
 ):
     """
     ガチャを1回回す。
@@ -57,9 +65,8 @@ async def gacha_spin(
 
     # Step 2: Claude API 呼び出し
     # 同期関数を非同期コンテキストで安全に実行するため run_in_executor を使う
-    import asyncio
+    
     loop = asyncio.get_event_loop()
-    claude_service = ClaudeService()
 
     try:
         generated = await loop.run_in_executor(
@@ -86,7 +93,6 @@ async def gacha_spin(
         )
 
     # Step 4: Unsplash で写真取得
-    unsplash_service = UnsplashService()
     image_url = await unsplash_service.search_food_image(generated.name_en)
 
     # Step 5: DBに保存
