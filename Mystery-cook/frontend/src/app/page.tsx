@@ -27,8 +27,12 @@ export default function Home() {
     }
   };
 
-  // gacha・result画面では下タブを非表示にする
   const showTab = screen === "top" || screen === "cooked";
+
+  // ローディング中は全画面ローディングを表示
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -50,7 +54,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* 下タブ */}
       {showTab && (
         <BottomTab current={screen} onChange={(s) => setScreen(s as Screen)} />
       )}
@@ -220,34 +223,28 @@ function GachaScreen({ dish, onReveal }: { dish: Dish; onReveal: () => void }) {
 function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
   const [showModal, setShowModal] = useState(false);
   const [cookedMessage, setCookedMessage] = useState("");
+  const [hasCooked, setHasCooked] = useState(false); // 追加
   const { data: session } = useSession();
+
   const handleCooked = async () => {
     if (!session) {
       setCookedMessage("ログインすると「作った！」を記録できます");
       return;
     }
-
-    console.log("session:", session); // ← 追加
-    console.log("accessToken:", (session as any).accessToken); // ← 追加
-
     try {
       await recordCooked(dish.id, (session as any).accessToken);
       setCookedMessage("記録しました！");
+      setHasCooked(true); // 追加
     } catch (e) {
-      console.error("recordCooked error:", e); // ← 追加
       setCookedMessage("記録に失敗しました。もう一度お試しください。");
     }
   };
+
   return (
     <>
-      {/* モーダル */}
       {showModal && (
-        <RecipeModal
-          dish={dish}
-          onClose={() => setShowModal(false)}
-        />
+        <RecipeModal dish={dish} onClose={() => setShowModal(false)} />
       )}
-
       <div className="flex flex-col flex-1 items-center justify-center bg-bg-cream px-6 py-12">
         <main className="flex flex-col items-center gap-6 w-full max-w-sm">
           <p className="font-playfair text-[10px] tracking-widest text-[#9A8060]">
@@ -255,11 +252,7 @@ function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
           </p>
           <div className="w-full bg-white rounded-2xl border border-border-linen overflow-hidden">
             {dish.unsplash_image_url ? (
-              <img
-                src={dish.unsplash_image_url}
-                alt={dish.name}
-                className="w-full h-40 object-cover"
-              />
+              <img src={dish.unsplash_image_url} alt={dish.name} className="w-full h-40 object-cover" />
             ) : (
               <div className="w-full h-40 bg-text-dark-brown" />
             )}
@@ -275,13 +268,8 @@ function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
                   {dish.cook_time_minutes}分
                 </span>
               </div>
-              <h2 className="font-playfair text-[22px] text-text-dark-brown">
-                {dish.name}
-              </h2>
-              <p className="font-noto text-[13px] text-'#6B5A3A' leading-relaxed">
-                {dish.description}
-              </p>
-              {/* レシピを見るボタン：クリックでモーダルを開く */}
+              <h2 className="font-playfair text-[22px] text-text-dark-brown">{dish.name}</h2>
+              <p className="font-noto text-[13px] text-[#6B5A3A] leading-relaxed">{dish.description}</p>
               <button
                 onClick={() => setShowModal(true)}
                 className="w-full rounded-lg bg-text-dark-brown py-3 font-noto text-[14px] text-bg-cream transition-opacity hover:opacity-80 cursor-pointer"
@@ -293,9 +281,11 @@ function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
                   {cookedMessage}
                 </p>
               )}
+              {/* 一回押したらdisabledにする */}
               <button
                 onClick={handleCooked}
-                className="w-full rounded-lg border border-border-linen py-3 font-noto text-[14px] text-text-dark-brown transition-opacity hover:opacity-80 cursor-pointer"
+                disabled={hasCooked}
+                className="w-full rounded-lg border border-border-linen py-3 font-noto text-[14px] text-text-dark-brown transition-opacity hover:opacity-80 cursor-pointer disabled:opacity-40"
               >
                 作った！
               </button>
@@ -313,7 +303,6 @@ function ResultScreen({ dish, onRetry }: { dish: Dish; onRetry: () => void }) {
   );
 }
 
-
 function BottomTab({ current, onChange }: { current: string; onChange: (s: string) => void }) {
   return (
     <nav className="flex border-t border-border-linen bg-bg-cream">
@@ -328,6 +317,8 @@ function BottomTab({ current, onChange }: { current: string; onChange: (s: strin
         </svg>
         ホーム
       </button>
+      {/* 区切り線 */}
+      <div className="w-px bg-border-linen my-2" />
       <button
         onClick={() => onChange("cooked")}
         className={`flex flex-1 flex-col items-center gap-1 py-3 font-noto text-[11px] transition-colors ${current === "cooked" ? "text-text-dark-brown" : "text-[#9A8060]"
@@ -348,6 +339,7 @@ function CookedScreen({ session }: { session: any }) {
   const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState<"cooked_at" | "name" | "country" | "difficulty">("cooked_at");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
+  const [selectedDish, setSelectedDish] = useState<Dish | null>(null); // 追加
 
   useEffect(() => {
     if (!session) return;
@@ -383,67 +375,95 @@ function CookedScreen({ session }: { session: any }) {
         >
           ログイン / 登録
         </a>
-      </div>
+      </div >
     );
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-bg-cream px-4 pt-6 pb-4">
-      <h2 className="font-playfair text-[20px] text-text-dark-brown mb-4">作った！リスト</h2>
+    <>
+      {/* モーダル */}
+      {selectedDish && (
+        <RecipeModal dish={selectedDish} onClose={() => setSelectedDish(null)} />
+      )}
 
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {(["cooked_at", "name", "country", "difficulty"] as const).map((key) => (
-          <button
-            key={key}
-            onClick={() => {
-              if (sortBy === key) {
-                setOrder(order === "desc" ? "asc" : "desc");
-              } else {
-                setSortBy(key);
-                setOrder("desc");
-              }
-            }}
-            className={`font-noto text-[11px] px-3 py-1 rounded-full border transition-colors ${sortBy === key
+      <div className="flex flex-col flex-1 bg-bg-cream px-4 pt-6 pb-4">
+        <h2 className="font-playfair text-[20px] text-text-dark-brown mb-4">作った！リスト</h2>
+
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {(["cooked_at", "name", "country", "difficulty"] as const).map((key) => (
+            <button
+              key={key}
+              onClick={() => {
+                if (sortBy === key) {
+                  setOrder(order === "desc" ? "asc" : "desc");
+                } else {
+                  setSortBy(key);
+                  setOrder("desc");
+                }
+              }}
+              className={`font-noto text-[11px] px-3 py-1 rounded-full border transition-colors ${sortBy === key
                 ? "bg-text-dark-brown text-bg-cream border-text-dark-brown"
                 : "text-[#9A8060] border-border-linen"
-              }`}
-          >
-            {{ cooked_at: "作った順", name: "料理名", country: "国名", difficulty: "難易度" }[key]}
-            {sortBy === key && (order === "desc" ? " ↓" : " ↑")}
-          </button>
-        ))}
-      </div>
-
-      {isLoading ? (
-        <p className="font-noto text-[13px] text-[#9A8060] text-center mt-8">読み込み中...</p>
-      ) : userDishes.length === 0 ? (
-        <p className="font-noto text-[13px] text-[#9A8060] text-center mt-8">
-          まだ「作った！」した料理がありません
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {userDishes.map((ud) => (
-            <div key={ud.id} className="bg-white rounded-xl border border-border-linen overflow-hidden">
-              {ud.dish.unsplash_image_url ? (
-                <img
-                  src={ud.dish.unsplash_image_url}
-                  alt={ud.dish.name}
-                  className="w-full h-24 object-cover"
-                />
-              ) : (
-                <div className="w-full h-24 bg-[#EDE5D8]" />
-              )}
-              <div className="p-2 flex flex-col gap-1">
-                <p className="font-noto text-[12px] font-bold text-text-dark-brown leading-tight">
-                  {ud.dish.name}
-                </p>
-                <p className="font-noto text-[10px] text-[#9A8060]">{ud.dish.country}</p>
-                <p className="font-noto text-[10px] text-[#9A8060]">難易度：{ud.dish.difficulty}</p>
-              </div>
-            </div>
+                }`}
+            >
+              {{ cooked_at: "作った順", name: "料理名", country: "国名", difficulty: "難易度" }[key]}
+              {sortBy === key && (order === "desc" ? " ↓" : " ↑")}
+            </button>
           ))}
         </div>
-      )}
+
+        {isLoading ? (
+          <p className="font-noto text-[13px] text-[#9A8060] text-center mt-8">読み込み中...</p>
+        ) : userDishes.length === 0 ? (
+          <p className="font-noto text-[13px] text-[#9A8060] text-center mt-8">
+            まだ「作った！」した料理がありません
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {userDishes.map((ud) => (
+              <div
+                key={ud.id}
+                className="bg-white rounded-xl border border-border-linen overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => setSelectedDish(ud.dish)} // 追加
+              >
+                {ud.dish.unsplash_image_url ? (
+                  <img
+                    src={ud.dish.unsplash_image_url}
+                    alt={ud.dish.name}
+                    className="w-full h-24 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-24 bg-[#EDE5D8]" />
+                )}
+                <div className="p-2 flex flex-col gap-1">
+                  <p className="font-noto text-[12px] font-bold text-text-dark-brown leading-tight">
+                    {ud.dish.name}
+                  </p>
+                  <p className="font-noto text-[10px] text-[#9A8060]">{ud.dish.country}</p>
+                  <p className="font-noto text-[10px] text-[#9A8060]">難易度：{ud.dish.difficulty}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+
+function LoadingScreen() {
+  return (
+    <div className="flex flex-col flex-1 items-center justify-center bg-[#1A0E06] gap-6">
+      <p
+        className="absolute font-playfair text-[48px] tracking-[0.3em] text-white select-none"
+        style={{ opacity: 0.1 }}
+      >
+        MYSTERY
+      </p>
+      {/* スピナー */}
+      <div className="w-10 h-10 rounded-full border-2 border-[#6B5A3A] border-t-accent-spice-orange animate-spin" />
+      <p className="font-noto text-[13px] text-[#6B5A3A]">料理を探しています...</p>
     </div>
   );
 }

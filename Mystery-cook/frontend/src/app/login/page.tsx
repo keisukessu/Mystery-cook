@@ -14,6 +14,13 @@ export default function LoginPage() {
         setIsLoading(true);
         setError("");
 
+        // パスワードの長さチェック
+        if (password.length < 8) {
+            setError("パスワードは8文字以上入力してください");
+            setIsLoading(false);
+            return;
+        }
+
         if (mode === "register") {
             // 新規登録：バックエンドの /auth/register を叩く
             const res = await fetch(
