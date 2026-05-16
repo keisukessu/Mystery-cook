@@ -56,3 +56,33 @@ export async function recordCooked(
         throw new Error(`APIエラー: ${res.status}`);
     }
 }
+
+// 「作った！」一覧のレスポンス型
+export type UserDish = {
+    id: string;
+    cooked_at: string;
+    dish: Dish;
+};
+
+export async function getUserDishes(
+    accessToken: string,
+    sortBy: "cooked_at" | "name" | "country" | "difficulty" = "cooked_at",
+    order: "asc" | "desc" = "desc"
+): Promise<UserDish[]> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+    const params = new URLSearchParams({ sort_by: sortBy, order });
+
+    const res = await fetch(`${baseUrl}/api/v1/user-dishes/?${params}`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error(`APIエラー: ${res.status}`);
+    }
+
+    return res.json();
+}
