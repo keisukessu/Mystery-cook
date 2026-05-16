@@ -4,7 +4,7 @@ schemas/dish.py
 ingredientsとstepsをDBにはJSON文字列で保存しているが、
 スキーマレベルでは list[str] として扱う。
 
-なぜDBでJSONテキスト保存にしたか（PostgreSQLのJSON型を使わない理由）：
+なぜDBでJSONテキスト保存にしたか(PostgreSQLのJSON型を使わない理由):
 - この規模のアプリでは JSONB のインデックスや演算子は不要
 - マイグレーション・型変換がシンプルになる
 - Python側で json.dumps / json.loads するだけで完結する
@@ -35,11 +35,6 @@ class DishResponse(BaseModel):
     @field_validator("ingredients", "steps", mode="before")
     @classmethod
     def parse_json_string(cls, v: str | list) -> list[str]:
-        """
-        DBから来る文字列をリストに変換する。
-        ORMオブジェクトから直接来た場合は文字列、
-        すでにリストの場合はそのまま返す。
-        """
         if isinstance(v, str):
             return json.loads(v)
         return v
@@ -48,13 +43,4 @@ class DishResponse(BaseModel):
 class GachaSpinResponse(BaseModel):
     """ガチャ1回分のレスポンス"""
     dish: DishResponse
-    is_cached: bool  # DBキャッシュから返したか、新規生成かをフロントに伝える
-
-
-class UserDishResponse(BaseModel):
-    """ユーザーの調理記録レスポンス"""
-    id: uuid.UUID
-    dish: DishResponse
-    cooked_at: datetime
-
-    model_config = {"from_attributes": True}
+    is_cached: bool
