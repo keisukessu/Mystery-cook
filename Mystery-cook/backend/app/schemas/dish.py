@@ -2,7 +2,6 @@ import uuid
 from datetime import datetime
 from pydantic import BaseModel
 
-from app.schemas.dish import DishResponse
 
 
 class UserDishCreate(BaseModel):
