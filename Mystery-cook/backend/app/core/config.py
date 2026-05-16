@@ -40,6 +40,7 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://mystery-cook.vercel.app",
+        "https://mystery-cook-git-feature-cook-1de3be-keisukes-projects-9e3aae3a.vercel.app",
     ]
 
     @property
