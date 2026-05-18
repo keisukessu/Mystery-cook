@@ -2,15 +2,17 @@
 
 ![logo](docs/mystery-cook-horizontal.png)
 
-[![Open in Visual Studio Code](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Open%20in%20Visual%20Studio%20Code&labelColor=2c2c32&color=007acc&logoColor=007acc)](https://open.vscode.dev/keisukessu/Mystery-cook)
+
 [![Backend Tests](https://github.com/keisukessu/Mystery-cook/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/keisukessu/Mystery-cook/actions/workflows/backend-tests.yml) [![Frontend Tests](https://github.com/keisukessu/Mystery-cook/actions/workflows/frontend-tests.yml/badge.svg)](https://github.com/keisukessu/Mystery-cook/actions/workflows/frontend-tests.yml)
 
-<div style="text-align: center;">
-  <span style="font-size: 1.25rem; font-weight: bold;">
-    Mystery Cook
-  </span>
-  - 世界の未知の料理に出合う -
+<div align="center">
+
+**Mystery Cook** - 世界の未知の料理に出合う
+
 </div>
+
+### 背景
+料理に興味を持ち始め、新しく色々な料理を作るのが楽しくほかにもいろんなものを作りたいと思っていた。自分が今までに作ったことのない料理を作れたら作るのも、食べるのも楽しいだろうと思い、まったく新しい世界のマイナーな料理をガチャ形式で提案するアプリを開発した。
 
 
 
@@ -20,7 +22,7 @@
 
 
 <!-- ![スクリーンショット](docs/home.jpg) -->
-
+![home](docs/home.jpg)
 
 
 ## 機能・特徴
