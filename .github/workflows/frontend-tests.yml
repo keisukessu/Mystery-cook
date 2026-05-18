@@ -1,0 +1,36 @@
+# .github/workflows/frontend-tests.yml
+#
+# フロントエンドのテストを GitHub Actions で自動実行するワークフロー。
+# バックエンドと違い DB が不要なのでシンプルな構成になっている。
+
+name: Frontend Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Node.js をセットアップ
+      # cache: "npm" で node_modules をキャッシュして2回目以降を高速化
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: Mystery-cook/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Mystery-cook/frontend
+        run: npm ci
+
+      # vitest を run モードで実行（watch モードにならないよう --run をつける）
+      - name: Run Vitest
+        working-directory: Mystery-cook/frontend
+        run: npm test -- --run
